@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barchan Dune Segmentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#E8D1A7;min-height:100vh}
+:root{
+  --brown-dark:#442D1D;--brown-mid:#6b3f24;--brown-light:#A78A6A;
+  --sand:#E8D1A7;--sand-dk:#d4b98a;--white:#ffffff;
+  --off-white:#f5ede0;--border:#c9a87a;--text-muted:#7a5c3a;--text-dark:#170a06;
+}
+#landing{position:relative;min-height:100vh;background:var(--brown-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#landing::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 0% 100%,rgba(232,209,167,.10) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 100% 0%,rgba(167,138,106,.25) 0%,transparent 55%);}
+.stripe-accent{position:absolute;top:0;right:0;width:220px;height:100%;background:repeating-linear-gradient(-45deg,transparent,transparent 18px,rgba(232,209,167,.07) 18px,rgba(232,209,167,.07) 22px);pointer-events:none;}
+.dune-silhouette{position:absolute;bottom:0;left:0;right:0;height:200px;opacity:.15;}
+.landing-inner{position:relative;z-index:2;text-align:center;padding:48px 24px;animation:fadeUp .85s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.landing-eyebrow{display:inline-block;background:var(--sand);color:var(--brown-dark);font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:5px 16px;border-radius:30px;margin-bottom:20px;}
+.landing-title{font-size:clamp(38px,6.5vw,78px);font-weight:800;color:var(--white);line-height:1.05;letter-spacing:-1.5px;}
+.landing-title span{color:var(--sand)}
+.landing-sub{margin-top:16px;font-size:clamp(14px,1.8vw,17px);color:rgba(255,255,255,.65);max-width:480px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.landing-cta{display:inline-block;margin-top:36px;background:var(--sand);color:var(--brown-dark);padding:14px 40px;border-radius:4px;font-size:13px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;text-decoration:none;border:none;transition:background .2s,transform .15s;font-family:'Inter',sans-serif;}
+.landing-cta:hover{background:#f0d9b5;transform:translateY(-2px)}
+#app{display:none;background:var(--sand);min-height:100vh;padding:36px 16px 72px}
+.app-wrap{max-width:960px;margin:0 auto}
+.top-card{background:var(--white);border-radius:4px;border-top:4px solid var(--brown-light);box-shadow:0 2px 24px rgba(68,45,29,.15);padding:32px 32px 24px;max-width:560px;margin:0 auto 28px;}
+.app-title{text-align:center;font-size:23px;font-weight:700;color:var(--brown-dark);margin-bottom:5px}
+.app-sub{text-align:center;font-size:13px;color:var(--text-muted);margin-bottom:20px}
+.models-info{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:20px;}
+.model-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;color:#fff;letter-spacing:.3px;}
+.file-row{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:13px;}
+.file-btn{background:#f5ede0;border:none;border-right:1.5px solid var(--border);padding:10px 14px;font-size:13px;font-weight:500;color:var(--brown-dark);cursor:pointer;white-space:nowrap;flex-shrink:0;position:relative;overflow:hidden;}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.file-btn:hover{background:#e8d9c5}
+.file-lbl{padding:10px 14px;font-size:13px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detect-btn{width:100%;padding:13px;background:var(--brown-dark);color:var(--sand);border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .15s,transform .15s;}
+.detect-btn:hover:not(:disabled){background:var(--brown-mid);transform:translateY(-1px)}
+.detect-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.prog-wrap{margin-top:14px;display:none}
+.prog-track{height:5px;background:#d4b98a;border-radius:5px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--brown-light),var(--sand));width:0%;transition:width .3s ease}
+.prog-text{font-size:12px;color:var(--text-muted);text-align:center;margin-top:7px}
+.credit{text-align:center;font-size:11.5px;color:#a07850;margin-top:20px}
+.credit strong{color:var(--text-muted)}.heart{color:#e05252}
+.results-header{text-align:center;margin-bottom:20px;display:none;}
+.results-header h2{font-size:22px;font-weight:700;color:var(--brown-dark)}
+.results-header p{font-size:13px;color:var(--text-muted);margin-top:4px}
+.results-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+@media(max-width:620px){.results-grid{grid-template-columns:1fr}}
+.res-card{background:var(--white);border-radius:4px;border-top:4px solid var(--brown-light);box-shadow:0 2px 24px rgba(68,45,29,.15);padding:22px 20px 18px;display:none;position:relative;overflow:hidden;}
+.res-card.visible{display:block;animation:fadeUp .45s ease both}
+.res-title{font-size:16px;font-weight:700;color:var(--brown-dark);margin-bottom:2px;text-align:center}
+.metrics-row{display:flex;gap:5px;margin-bottom:13px;flex-wrap:wrap}
+.m-box{flex:1;min-width:56px;padding:8px 4px;border:1.5px solid var(--border);border-radius:4px;text-align:center;background:var(--off-white)}
+.m-val{font-size:13px;font-weight:700;color:var(--brown-dark)}
+.m-lbl{font-size:9.5px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.panel-lbls{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:5px}
+.p-lbl{text-align:center;font-size:10.5px;color:var(--text-muted);font-weight:500}
+.panels{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:12px}
+.p-box{aspect-ratio:1;background:#1a0d05;border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.p-box img,.p-box canvas{width:100%;height:100%;object-fit:cover;display:block}
+.res-credit{text-align:center;font-size:11px;color:#a07850;margin-top:14px}
+.card-color-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.seg-perf-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<section id="landing">
+  <div class="stripe-accent"></div>
+  <svg class="dune-silhouette" viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 200 Q180 60 360 120 Q540 180 720 60 Q900 -30 1080 90 Q1260 190 1440 70 L1440 200Z" fill="#E8D1A7"/>
+    <path d="M0 200 Q240 110 480 150 Q720 190 960 90 Q1140 20 1300 130 L1440 200Z" fill="#A78A6A" opacity=".6"/>
+    <path d="M0 200 Q300 160 600 175 Q900 190 1100 130 Q1300 80 1440 170 L1440 200Z" fill="#6b3f24" opacity=".5"/>
+  </svg>
+  <div class="landing-inner">
+    <div class="landing-eyebrow">Saudi Arabia · Eastern Province</div>
+    <h1 class="landing-title">Welcome to<br>Barchan Dune<br><span>Analysis</span></h1>
+    <p class="landing-sub">Automated semantic segmentation of isolated barchan dunes from satellite imagery using deep learning models.</p>
+    <button class="landing-cta" onclick="showApp()">ANALYZE YOUR SATELLITE IMAGE</button>
+  </div>
+</section>
+
+<div id="app">
+  <div class="app-wrap">
+    <div class="top-card">
+      <div class="app-title">Barchan Dune Segmentation</div>
+      <div class="app-sub">Upload a satellite image to run all four segmentation models simultaneously.</div>
+      <div class="models-info">
+        <span class="model-badge" style="background:#2e7d32">U-Net</span>
+        <span class="model-badge" style="background:#1565c0">U-Net++</span>
+        <span class="model-badge" style="background:#6a1b9a">DeepLabv3</span>
+        <span class="model-badge" style="background:#e65100">DeepLabv3+</span>
+      </div>
+      <div class="file-row">
+        <label class="file-btn">Choose File<input type="file" id="fileInput" accept="image/*"></label>
+        <span class="file-lbl" id="fileLabel">No file chosen</span>
+      </div>
+      <button class="detect-btn" id="detectBtn" disabled>Run All Models</button>
+      <div class="prog-wrap" id="pw">
+        <div class="prog-track"><div class="prog-fill" id="pf"></div></div>
+        <div class="prog-text" id="pt">Initializing…</div>
+      </div>
+      <div class="credit">
+        Created with <span class="heart">♥</span> by <strong>Dune Lab</strong> for Barchan Dune Research © 2025
+      </div>
+    </div>
+    <div class="results-header" id="resultsHeader">
+      <h2>Model Comparison Results</h2>
+      <p>All four models analyzed your image — compare results below</p>
+    </div>
+    <div class="results-grid" id="resultsGrid"></div>
+  </div>
+</div>
+
+<script>
+const API_URL = '';
+
+const MODELS = {
+  unet:    { name:'U-Net',      color:'#2e7d32' },
+  unetpp:  { name:'U-Net++',   color:'#1565c0' },
+  deepv3:  { name:'DeepLabv3', color:'#6a1b9a' },
+  deepv3p: { name:'DeepLabv3+',color:'#e65100' },
+};
+
+const STEPS = [
+  'Loading encoder weights…','Running U-Net…','Running U-Net++…',
+  'Running DeepLabv3…','Running DeepLabv3+…','Computing metrics…',
+  'Generating masks…','Done ✓'
+];
+
+let file = null;
+
+function showApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').style.display='block';
+  window.scrollTo(0,0);
+}
+
+document.getElementById('fileInput').addEventListener('change',function(){
+  file=this.files[0];
+  if(!file)return;
+  document.getElementById('fileLabel').textContent=file.name;
+  document.getElementById('detectBtn').disabled=false;
+});
+
+document.getElementById('detectBtn').addEventListener('click',async()=>{
+  if(!file)return;
+  document.getElementById('detectBtn').disabled=true;
+  document.getElementById('resultsHeader').style.display='none';
+  document.getElementById('resultsGrid').innerHTML='';
+  const pw=document.getElementById('pw'),pf=document.getElementById('pf'),pt=document.getElementById('pt');
+  pw.style.display='block';pf.style.width='0%';
+  try{ await fetch(`${API_URL}/health`); }
+  catch(e){
+    pw.style.display='none';
+    document.getElementById('detectBtn').disabled=false;
+    alert('⚠️ السيرفر ما يشتغل!\n\nافتح Terminal في VS Code وشغّل:\n\n  python app.py');
+    return;
+  }
+  let i=0;
+  const iv=setInterval(()=>{
+    i=Math.min(i+1,STEPS.length-1);
+    pf.style.width=Math.round(i/STEPS.length*100)+'%';
+    pt.textContent=STEPS[i];
+  },500);
+  try{
+    const formData=new FormData();
+    formData.append('image',file);
+    const response=await fetch(`${API_URL}/predict`,{method:'POST',body:formData});
+    const masks=await response.json();
+    clearInterval(iv);pf.style.width='100%';pt.textContent='Done ✓';
+    setTimeout(()=>{pw.style.display='none';renderAll(masks);document.getElementById('detectBtn').disabled=false;},400);
+  }catch(err){
+    clearInterval(iv);pw.style.display='none';
+    document.getElementById('detectBtn').disabled=false;
+    alert('حدث خطأ: '+err.message);
+  }
+});
+
+function renderAll(masks){
+  const grid=document.getElementById('resultsGrid');
+  const header=document.getElementById('resultsHeader');
+  header.style.display='block';grid.innerHTML='';
+  Object.entries(MODELS).forEach(([key,m],idx)=>{
+    const result=masks?masks[key]:null;
+    const card=buildCard(key,m,idx,result);
+    grid.appendChild(card);
+    setTimeout(()=>card.classList.add('visible'),idx*120);
+  });
+  setTimeout(()=>header.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+function buildCard(key,m,idx,result){
+  const card=document.createElement('div');
+  card.className='res-card';
+  const bar=document.createElement('div');
+  bar.className='card-color-bar';bar.style.background=m.color;
+  card.appendChild(bar);
+  const predId=`pPred_${key}`,imgId=`pInput_${key}`;
+  const confidence   =result?result.confidence.toFixed(2):'—';
+  const dune_coverage=result?result.dune_coverage.toFixed(2):'—';
+  const activation   =result?result.mean_activation.toFixed(4):'—';
+  const sharpness    =result?result.sharpness.toFixed(4):'—';
+  const maskB64      =result?result.mask:null;
+  card.innerHTML+=`
+    <div class="res-title" style="color:${m.color}">${m.name}</div>
+    <div class="seg-perf-label">Segmentation Performance</div>
+    <div class="metrics-row">
+      <div class="m-box"><div class="m-val">${confidence}%</div><div class="m-lbl">Confidence</div></div>
+      <div class="m-box"><div class="m-val">${dune_coverage}%</div><div class="m-lbl">Coverage</div></div>
+      <div class="m-box"><div class="m-val">${activation}</div><div class="m-lbl">Activation</div></div>
+      <div class="m-box"><div class="m-val">${sharpness}</div><div class="m-lbl">Sharpness</div></div>
+    </div>
+    <div class="panel-lbls">
+      <div class="p-lbl">Input Image</div>
+      <div class="p-lbl">Predicted Mask</div>
+    </div>
+    <div class="panels">
+      <div class="p-box"><img id="${imgId}" src="" alt="Input"></div>
+      <div class="p-box" id="pbox_${key}"><canvas id="${predId}"></canvas></div>
+    </div>
+    <div class="res-credit">
+      Created with <span class="heart" style="color:#e05252">♥</span> by <strong>Dune Lab</strong> © 2025
+    </div>`;
+  setTimeout(()=>{
+    document.getElementById(imgId).src=URL.createObjectURL(file);
+    if(maskB64){
+      document.getElementById(`pbox_${key}`).innerHTML=
+        `<img src="data:image/png;base64,${maskB64}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="mask">`;
+    }else{drawPanel(predId,m.color);}
+  },50);
+  return card;
+}
+
+function drawPanel(id,color){
+  const cv=document.getElementById(id);if(!cv)return;
+  const S=280;cv.width=S;cv.height=S;
+  const ctx=cv.getContext('2d'),cx=S/2,cy=Math.round(S*.53);
+  ctx.fillStyle='#0a1a0a';ctx.fillRect(0,0,S,S);
+  ctx.fillStyle='#ffffff';dunePath(ctx,cx,cy);ctx.fill();
+  ctx.fillStyle='#0a1a0a';ctx.beginPath();ctx.ellipse(cx,cy+35,27,19,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=color;ctx.lineWidth=2.2;ctx.globalAlpha=.7;
+  dunePath(ctx,cx,cy);ctx.stroke();ctx.globalAlpha=1;
+}
+
+function dunePath(ctx,cx,cy){
+  ctx.beginPath();ctx.moveTo(cx-60,cy+50);
+  ctx.bezierCurveTo(cx-80,cy-16,cx-42,cy-78,cx,cy-90);
+  ctx.bezierCurveTo(cx+42,cy-78,cx+80,cy-16,cx+60,cy+50);
+  ctx.bezierCurveTo(cx+30,cy+30,cx+10,cy+10,cx,cy+10);
+  ctx.bezierCurveTo(cx-10,cy+10,cx-30,cy+30,cx-60,cy+50);
+}
+</script>
+</body>
+</html>
