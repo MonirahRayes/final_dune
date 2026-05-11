@@ -27,10 +27,10 @@ from flask_cors import CORS
 #  إعدادات — غيّر المسارات حقت الـ .pth فقط
 # ─────────────────────────────────────────
 MODEL_PATHS = {
-    "unet":    "/Users/monirah/Downloads/protoype22/Models/unet_CLAHE_pretrained_best.pth",       # ← اسم الملف الحقيقي
-    "unetpp":  "/Users/monirah/Downloads/protoype22/Models/unetplusplus_no preprocessing_pretrained_best.pth",     # ← اسم الملف الحقيقي
-    "deepv3":  "/Users/monirah/Downloads/protoype22/Models/deeplabv3_CLAHE_pretrained_best.pth",  # ← اسم الملف الحقيقي
-    "deepv3p": "/Users/monirah/Downloads/protoype22/Models/deeplabv3plus_no preprocessing_pretrained_best.pth", # ← اسم الملف الحقيقي
+    "unet":    "/Users/ceosarah/Desktop/GP/final_dune/Models/unet_CLAHE_pretrained_best.pth",       # ← اسم الملف الحقيقي
+    "unetpp":  "/Users/ceosarah/Desktop/GP/final_dune/Models/unetplusplus_no preprocessing_pretrained_best.pth",     # ← اسم الملف الحقيقي
+    "deepv3":  "/Users/ceosarah/Desktop/GP/final_dune/Models/deeplabv3_CLAHE_pretrained_best.pth",  # ← اسم الملف الحقيقي
+    "deepv3p": "/Users/ceosarah/Desktop/GP/final_dune/Models/deeplabv3plus_no preprocessing_pretrained_best.pth", # ← اسم الملف الحقيقي
 }
 
 # نفس إعدادات التدريب من نوتبوكاتكم
@@ -97,12 +97,33 @@ def mask_to_base64(mask_np):
 # ─────────────────────────────────────────
 #  Flask App
 # ─────────────────────────────────────────
+BASE_DIR = Path(__file__).resolve().parent
+
 app = Flask(__name__)
 CORS(app)  # يسمح للـ HTML يتكلم مع السيرفر
 
+@app.route('/desert-background.png')
+def desert_background():
+    return send_from_directory(BASE_DIR, 'desert-background.png')
+
+@app.route('/barchan-transition.png')
+def barchan_transition():
+    return send_from_directory(BASE_DIR, 'barchan-transition.png')
+
+@app.route('/newbackground.JPG')
+def new_background():
+    return send_from_directory(BASE_DIR, 'newbackground.JPG')
+
+@app.route('/withoutWords.png')
+def without_words_logo_png():
+    return send_from_directory(BASE_DIR, 'withoutWords.png')
+
+@app.route('/withoutWords.svg')
+def without_words_logo_svg():
+    return send_from_directory(BASE_DIR, 'withoutWords.svg')
 @app.route("/")
 def index():
-    return send_from_directory(".", "barchan_final.html")
+    return send_from_directory(BASE_DIR, "barchan_final.html")
 
 @app.route("/health", methods=["GET"])
 def health():
