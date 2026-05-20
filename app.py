@@ -27,10 +27,10 @@ from flask_cors import CORS
 #  إعدادات — غيّر المسارات حقت الـ .pth فقط
 # ─────────────────────────────────────────
 MODEL_PATHS = {
-    "unet":    "/Users/ceosarah/Desktop/GP/final_dune/Models/unet_CLAHE_pretrained_best.pth",       # ← اسم الملف الحقيقي
-    "unetpp":  "/Users/ceosarah/Desktop/GP/final_dune/Models/unetplusplus_no preprocessing_pretrained_best.pth",     # ← اسم الملف الحقيقي
-    "deepv3":  "/Users/ceosarah/Desktop/GP/final_dune/Models/deeplabv3_CLAHE_pretrained_best.pth",  # ← اسم الملف الحقيقي
-    "deepv3p": "/Users/ceosarah/Desktop/GP/final_dune/Models/deeplabv3plus_no preprocessing_pretrained_best.pth", # ← اسم الملف الحقيقي
+    "unet":    "/Users/monirah/Downloads/protoype22/Models/unet_CLAHE_pretrained_best.pth",       # ← اسم الملف الحقيقي
+    "unetpp":  "/Users/monirah/Downloads/protoype22/Models/unetplusplus_no preprocessing_pretrained_best.pth",     # ← اسم الملف الحقيقي
+    "deepv3":  "/Users/monirah/Downloads/protoype22/Models/deeplabv3_CLAHE_pretrained_best.pth",  # ← اسم الملف الحقيقي
+    "deepv3p": "/Users/monirah/Downloads/protoype22/Models/deeplabv3plus_no preprocessing_pretrained_best.pth", # ← اسم الملف الحقيقي
 }
 
 # نفس إعدادات التدريب من نوتبوكاتكم
@@ -114,9 +114,13 @@ def barchan_transition():
 def new_background():
     return send_from_directory(BASE_DIR, 'newbackground.JPG')
 
-@app.route('/withoutWords.png')
-def without_words_logo_png():
-    return send_from_directory(BASE_DIR, 'withoutWords.png')
+@app.route('/withoutWords.PNG')
+def without_words_logo_PNG():
+    return send_from_directory(BASE_DIR, 'withoutWords.PNG')
+
+@app.route('/project-logo.png')
+def project_logo():
+    return send_from_directory(BASE_DIR, 'project-logo.png')
 
 @app.route('/withoutWords.svg')
 def without_words_logo_svg():
