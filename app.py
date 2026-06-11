@@ -175,4 +175,4 @@ def predict():
 if __name__ == "__main__":
     print("\n🚀  افتحي المتصفح على: http://localhost:5000")
     print("    ما تحتاجين Live Server — السيرفر يخدم الموقع مباشرة\n")
-    app.run(port=5000, debug=False)
+    app.run(port=8080, debug=False)

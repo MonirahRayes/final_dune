@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barchan Dune Segmentation</title>
+<title>Barchan Dune Segmentation V1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -258,9 +258,7 @@ function buildCard(key,m,idx,result){
     <div class="res-title" style="color:${m.color}">${m.name}</div>
     <div class="seg-perf-label">Segmentation Performance</div>
     <div class="metrics-row">
-      <div class="m-box"><div class="m-val">${confidence}%</div><div class="m-lbl">Confidence</div></div>
       <div class="m-box"><div class="m-val">${dune_coverage}%</div><div class="m-lbl">Coverage</div></div>
-      <div class="m-box"><div class="m-val">${activation}</div><div class="m-lbl">Activation</div></div>
       <div class="m-box"><div class="m-val">${sharpness}</div><div class="m-lbl">Sharpness</div></div>
     </div>
     <div class="panel-lbls">
